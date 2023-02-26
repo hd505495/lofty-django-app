@@ -9,11 +9,13 @@ services:
     expose:
       - 8000
     # tty: true
-    # command: gunicorn app.asgi -w 4 -k uvicorn.workers.UvicornWorker
-    command: /bin/sh -c "cd app/ && gunicorn app.wsgi:application --bind 0.0.0.0:8080"
+    command: /bin/sh -c "uvicorn app.asgi:application --workers 4 --host 0.0.0.0 --port 8000"
+    # command: /bin/sh -c "gunicorn app.wsgi:application --bind 0.0.0.0:8000 --reload"
+    # command: /bin/sh -c "cd app/ && gunicorn app.wsgi:application --bind 0.0.0.0:8000 --reload"
     restart: always
     volumes:
       - ../..:/workspaces:cached
+      - ../app:/app
 
     # Overrides default command so things don't shut down after the process ends.
     # command: sleep infinity
@@ -36,6 +38,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
 
     # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
