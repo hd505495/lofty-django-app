@@ -9,6 +9,6 @@ urlpatterns = [
     path('keys/', views.keyvalue_create),
     path('keys/<str:key>/increment/', views.keyvalue_increment),
 
-    path('dogs/generate', views.dogs_generate),
+    path('dogs/generate/', views.dogs_generate),
     path('dog/', views.dog_get),
 ]
