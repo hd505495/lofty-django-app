@@ -1,16 +1,17 @@
 # from django.shortcuts import render
-import json, logging, sys
+import base64, json, logging, sys
 
 import requests, urllib
 
 from asgiref.sync import sync_to_async
+from django.conf import settings
 from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
 from django.http import HttpResponse, JsonResponse
 
 from PIL import Image
 
-from .models import KeyValue, DogImage
+from .models import DogImage, KeyValue
 # from .serializers import KeyValueSerializer
 
 
@@ -100,8 +101,10 @@ def dogs_generate(request):
         dog_image.bits = getattr(image, 'bits', None)
         dog_image.layers = getattr(image, 'layers', None)
         dog_image.image.save(filename, image_file)
-        dog_image.image_url = dog_img_url
+        # dog_image.image_url = dog_img_url
         dog_image.save()
+
+        image.close()
 
     return HttpResponse(status=200)
 
@@ -112,6 +115,45 @@ def dog_get(request):
     if request.method != 'GET':
         return HttpResponse(status=405)
     
+    # logging.basicConfig(filename='logs/error.log', encoding='utf-8', level=logging.DEBUG)
+    original_obj = DogImage.objects.order_by('?').first()
+    original = Image.open(original_obj.image)
+    flipped = original.transpose(method=Image.FLIP_TOP_BOTTOM)
+    filename = f"{settings.MEDIA_DIR}/dogs/flipped/{original_obj.filename}"
+    flipped.save(filename)
+
+    modified_uri = request.build_absolute_uri(f"/media/dogs/flipped/{original_obj.filename}")
+    original_uri = request.build_absolute_uri(original_obj.image.url)
+
+    # logging.info(vars(original_obj))
+    # logging.info(original_obj)
+
+    # original.close()
+    # flipped.close()
+    # with open(f"/app{original_obj.image.url}", 'rb') as image_file:
+    #     image_data = base64.b64encode(image_file.read()).decode('utf-8')
+
+    # return JsonResponse({'image': image_data})
+
+    metadata = {
+        'filename': original_obj.filename,
+        'height': original_obj.height,
+        'width': original_obj.width,
+        'format': original_obj.format,
+        'mode': original_obj.mode,
+        'frames': original_obj.frames,
+        'bits': original_obj.bits,
+        'layers': original_obj.layers
+    }
+
+    return JsonResponse({
+        'modified': modified_uri,
+        # 'modified': request.build_absolute_uri(f"dogs/flipped/{original_obj.filename}"),
+        # 'modified': request.build_absolute_uri(f"{str(settings.BASE_DIR)[:-3]}media/dogs/flipped/{original_obj.filename}"),
+        'original': original_uri,
+        'metadata': metadata
+    })
+
 
 
 # class KeyValueList(generics.ListAPIView):
