@@ -1,0 +1,29 @@
+config:
+  target: "http://127.0.0.1:8000/api"
+  phases:
+    - duration: 20
+      arrivalRate: 5
+      name: Warm up
+    - duration: 30
+      arrivalRate: 5
+      rampTo: 50
+      name: Ramp up load
+    - duration: 120
+      arrivalRate: 50
+      name: Sustained load
+  payload:
+    path: "keywords.csv"
+    fields:
+      - "keyword"
+
+scenarios:
+  - name: "KeyValue Async API Test"
+    flow:
+      - post:
+          url: "/keys/"
+          json:
+            key: "{{ keyword }}"
+      - post:
+          url: "/keys/{{ keyword }}/increment/"
+      - get:
+          url: "/keys/list/"
