@@ -9,26 +9,19 @@ services:
     image: hawkd/loftyapi:latest
     expose:
       - 8000
-    # tty: true
-    command: /bin/sh -c "uvicorn app.asgi:application --workers 4 --host 0.0.0.0 --port 8000"
+    command: /bin/sh -c "cd app/ && python manage.py migrate --noinput && uvicorn app.asgi:application --workers 4 --host 0.0.0.0 --port 8000"
     # command: /bin/sh -c "gunicorn app.wsgi:application --bind 0.0.0.0:8000 --reload"
     # command: /bin/sh -c "cd app/ && gunicorn app.wsgi:application --bind 0.0.0.0:8000 --reload"
     restart: always
     volumes:
       - ../..:/workspaces:cached
-      - ../app:/app
-
-    # Overrides default command so things don't shut down after the process ends.
-    # command: sleep infinity
+      # - ../app:/app
 
     # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
     # network_mode: service:db
 
     depends_on:
       - db
-
-    # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
-    # (Adding the "ports" property to this file will not forward from a Codespace.)
 
   db:
     image: postgres:latest
@@ -42,9 +35,6 @@ services:
     ports:
       - 5432:5432
 
-    # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
-    # (Adding the "ports" property to this file will not forward from a Codespace.)
-   
   nginx:
     build: ../nginx/
     restart: unless-stopped
@@ -56,13 +46,5 @@ services:
     depends_on:
       - app
        
-  # cache:
-  #   image: redis:alpine
-  #   restart: always
-  #   ports:
-  #     - '6379:6379'
-  #   volumes: 
-  #     - cache:/data
 volumes:
   postgres-data:
-  # cache:
