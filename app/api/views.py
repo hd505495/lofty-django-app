@@ -104,8 +104,8 @@ def dog_get(request):
     filename = f"{settings.MEDIA_DIR}/dogs/flipped/{original_obj.filename}"
     flipped.save(filename)
 
-    modified_uri = request.build_absolute_uri(f"/media/dogs/flipped/{original_obj.filename}")
-    original_uri = request.build_absolute_uri(original_obj.image.url)
+    modified_uri = f"{request.get_host()}:{request.get_port()}/media/dogs/flipped/{original_obj.filename}"
+    original_uri = f"{request.get_host()}:{request.get_port()}{original_obj.image.url}"
 
     metadata = {
         'filename': original_obj.filename,
