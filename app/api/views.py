@@ -27,7 +27,7 @@ async def keyvalue_create(request):
     key = json.loads(request.body).get('key', '') if request.body else None
     if (key):
         obj = await KeyValue.objects.acreate(key=key)
-        return JsonResponse({'key': obj.key})
+        return JsonResponse({obj.key: obj.value}, status=status.HTTP_201_CREATED)
 
     return HttpResponse({}, status=status.HTTP_400_BAD_REQUEST)
 
