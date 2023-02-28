@@ -6,6 +6,7 @@ services:
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
+    image: hawkd/loftyapi:latest
     expose:
       - 8000
     # tty: true
